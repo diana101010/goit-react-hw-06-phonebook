@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addContact, deleteContact, setFilter } from './contactsSlice';
-import { store, persistor } from './store'; 
+//import { store, persistor } from './store';
 import { PersistGate } from 'redux-persist/integration/react';
 
 const ContactBook = () => {
