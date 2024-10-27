@@ -1,31 +1,32 @@
 import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { addContact, deleteContact, setFilter } from './contactsSlice';
-//import { store, persistor } from './store';
-import { PersistGate } from 'redux-persist/integration/react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact, deleteContact, updateFilter } from './contactSlice';
 
 const ContactBook = () => {
   const dispatch = useDispatch();
-  const { contacts, filter } = useSelector(state => state);
+  const contacts = useSelector(state => state.contacts.contacts);
+  const filter = useSelector(state => state.contacts.filter);
   const [name, setName] = React.useState('');
   const [number, setNumber] = React.useState('');
 
   useEffect(() => {
     const storedContacts = localStorage.getItem('contacts');
     if (storedContacts) {
-      JSON.parse(storedContacts).forEach(contact => {
-        dispatch(addContact(contact));
-      });
     }
-  }, [dispatch]);
+  }, []);
+
+  const handleInputChange = event => {
+    const { name, value } = event.target;
+    if (name === 'name') setName(value);
+    else if (name === 'number') setNumber(value);
+  };
 
   const handleFormSubmit = event => {
     event.preventDefault();
-
     const newContact = {
-      id: Date.now().toString(),
       name,
       number,
+      id: Date.now().toString(),
     };
 
     const existingContact = contacts.find(
@@ -43,7 +44,7 @@ const ContactBook = () => {
   };
 
   const handleFind = event => {
-    dispatch(setFilter(event.target.value));
+    dispatch(updateFilter(event.target.value));
   };
 
   const handleDeleteContact = contactId => {
@@ -69,17 +70,23 @@ const ContactBook = () => {
         <input
           style={{ width: 'fit-content' }}
           type="text"
-          value={name}
-          onChange={e => setName(e.target.value)}
+          name="name"
+          pattern="^[a-zA-Z]+(([' -][a-zA-Z ])?[a-zA-Z]*)*$"
+          title="Name may contain only letters, apostrophe, dash, and spaces."
           required
+          value={name}
+          onChange={handleInputChange}
         />
         <label>Number</label>
         <input
           style={{ width: 'fit-content' }}
           type="tel"
-          value={number}
-          onChange={e => setNumber(e.target.value)}
+          name="number"
+          pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
+          title="Phone number must be digits and can contain spaces, dashes, parentheses, and can start with +"
           required
+          value={number}
+          onChange={handleInputChange}
         />
         <button
           type="submit"
@@ -108,10 +115,4 @@ const ContactBook = () => {
   );
 };
 
-export default function App() {
-  return (
-    <PersistGate loading={null} persistor={persistor}>
-      <ContactBook />
-    </PersistGate>
-  );
-}
+export default ContactBook;
